@@ -1,0 +1,302 @@
+[
+  {
+    "id": 1,
+    "question": "Which material is typically magnetic?",
+    "image": "",
+    "difficulty": "easy",
+    "options": ["Iron", "Wood", "Plastic", "Glass"],
+    "answer": "Iron",
+    "explanation": "Iron is a common magnetic material.",
+    "topic": "Basics"
+  },
+  {
+    "id": 2,
+    "question": "What are the ends of a magnet called?",
+    "image": "",
+    "difficulty": "easy",
+    "options": ["Edges", "Poles", "Corners", "Points"],
+    "answer": "Poles",
+    "explanation": "The ends of a magnet are called north and south poles.",
+    "topic": "Basics"
+  },
+  {
+    "id": 3,
+    "question": "Like poles ______ each other.",
+    "image": "",
+    "difficulty": "easy",
+    "options": ["Attract", "Repel", "Rotate", "Displace"],
+    "answer": "Repel",
+    "explanation": "Like poles repel while opposite poles attract.",
+    "topic": "Poles"
+  },
+  {
+    "id": 4,
+    "question": "Opposite poles ______ each other.",
+    "image": "",
+    "difficulty": "easy",
+    "options": ["Attract", "Repel", "Rotate", "Break"],
+    "answer": "Attract",
+    "explanation": "North and south poles attract one another.",
+    "topic": "Poles"
+  },
+  {
+    "id": 5,
+    "question": "Which instrument uses a magnet to show direction?",
+    "image": "",
+    "difficulty": "easy",
+    "options": ["Thermometer", "Compass", "Barometer", "Clock"],
+    "answer": "Compass",
+    "explanation": "A compass uses a magnetic needle to point north.",
+    "topic": "Applications"
+  },
+  {
+    "id": 6,
+    "question": "Magnets attract objects made of ______.",
+    "image": "",
+    "difficulty": "easy",
+    "options": ["Aluminum", "Copper", "Iron", "Silver"],
+    "answer": "Iron",
+    "explanation": "Iron and some alloys are attracted to magnets.",
+    "topic": "Basics"
+  },
+  {
+    "id": 7,
+    "question": "Which part of the Earth acts like a giant magnet?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["Core", "Mantle", "Crust", "Atmosphere"],
+    "answer": "Core",
+    "explanation": "The Earth's core generates a magnetic field.",
+    "topic": "Earth"
+  },
+  {
+    "id": 8,
+    "question": "What happens when you cut a magnet in half?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["You get two magnets", "It loses magnetism", "Only north pole remains", "Only south pole remains"],
+    "answer": "You get two magnets",
+    "explanation": "Cutting a magnet results in two smaller magnets each with both poles.",
+    "topic": "Properties"
+  },
+  {
+    "id": 9,
+    "question": "Which metal is not attracted to a magnet?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["Nickel", "Cobalt", "Copper", "Iron"],
+    "answer": "Copper",
+    "explanation": "Copper is not ferromagnetic.",
+    "topic": "Materials"
+  },
+  {
+    "id": 10,
+    "question": "Which of these is a temporary magnet?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["Bar magnet", "Electromagnet", "Horseshoe magnet", "Lodestone"],
+    "answer": "Electromagnet",
+    "explanation": "Electromagnets act as magnets only when electric current flows.",
+    "topic": "Types"
+  },
+  {
+    "id": 11,
+    "question": "Which device uses electromagnets?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["Electric bell", "Candle", "Book", "Spoon"],
+    "answer": "Electric bell",
+    "explanation": "Electric bells use electromagnets to create sound.",
+    "topic": "Applications"
+  },
+  {
+    "id": 12,
+    "question": "Which pole of a compass needle points north?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["North pole", "South pole", "Both", "None"],
+    "answer": "North pole",
+    "explanation": "The north pole of a compass needle aligns with Earth's magnetic north.",
+    "topic": "Applications"
+  },
+  {
+    "id": 13,
+    "question": "What is the region around a magnet where force acts?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["Magnetic field", "Electric field", "Heat zone", "Gravity"],
+    "answer": "Magnetic field",
+    "explanation": "The magnetic field is the region around a magnet where magnetic forces are felt.",
+    "topic": "Field"
+  },
+  {
+    "id": 14,
+    "question": "Which material can be used to make a permanent magnet?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Soft iron", "Steel", "Copper", "Aluminum"],
+    "answer": "Steel",
+    "explanation": "Steel can retain magnetism and is used for permanent magnets.",
+    "topic": "Materials"
+  },
+  {
+    "id": 15,
+    "question": "What do we call the process of losing magnetism?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Saturation", "Demagnetization", "Polarization", "Rectification"],
+    "answer": "Demagnetization",
+    "explanation": "When a magnet loses its magnetic properties, it's demagnetized.",
+    "topic": "Properties"
+  },
+  {
+    "id": 16,
+    "question": "Which method can demagnetize a magnet?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Heating", "Cooling", "Freezing", "Drying"],
+    "answer": "Heating",
+    "explanation": "Heating a magnet to a high temperature can demagnetize it.",
+    "topic": "Properties"
+  },
+  {
+    "id": 17,
+    "question": "The strength of a magnet is strongest at the ______.",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Center", "Poles", "Sides", "Edges"],
+    "answer": "Poles",
+    "explanation": "The magnetic force is strongest at the poles.",
+    "topic": "Poles"
+  },
+  {
+    "id": 18,
+    "question": "What is magnetite also known as?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Sandstone", "Lodestone", "Granite", "Quartz"],
+    "answer": "Lodestone",
+    "explanation": "Magnetite is a naturally occurring magnet called lodestone.",
+    "topic": "Types"
+  },
+  {
+    "id": 19,
+    "question": "Which scientist discovered electromagnetism?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Newton", "Faraday", "Edison", "Einstein"],
+    "answer": "Faraday",
+    "explanation": "Michael Faraday discovered electromagnetic induction.",
+    "topic": "History"
+  },
+  {
+    "id": 20,
+    "question": "What happens when a magnet is hammered?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["It becomes stronger", "It demagnetizes", "It grows larger", "Nothing"],
+    "answer": "It demagnetizes",
+    "explanation": "Strong mechanical shock can demagnetize a magnet.",
+    "topic": "Properties"
+  },
+  {
+    "id": 21,
+    "question": "Which of the following is an example of magnetic storage?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["CD", "Floppy disk", "DVD", "USB"],
+    "answer": "Floppy disk",
+    "explanation": "Floppy disks use magnetic storage to record data.",
+    "topic": "Applications"
+  },
+  {
+    "id": 22,
+    "question": "Which law explains attraction and repulsion of magnetic poles?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Ohm's law", "Coulomb's law", "Boyle's law", "Kepler's law"],
+    "answer": "Coulomb's law",
+    "explanation": "Coulomb's inverse square law applies to magnetic poles.",
+    "topic": "Laws"
+  },
+  {
+    "id": 23,
+    "question": "Magnets can lose strength over time due to ______.",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Rusting", "Moisture", "Ageing", "Heat"],
+    "answer": "Ageing",
+    "explanation": "Magnetic domains can shift over time, reducing strength.",
+    "topic": "Properties"
+  },
+  {
+    "id": 24,
+    "question": "Which orientation of a coil produces the strongest electromagnet?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Few turns", "Many turns", "No turns", "Straight wire"],
+    "answer": "Many turns",
+    "explanation": "Increasing the number of coil turns increases magnetic strength.",
+    "topic": "Electromagnet"
+  },
+  {
+    "id": 25,
+    "question": "Which form of magnet is used in credit cards?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Bar magnet", "Magnetic stripe", "Electromagnet", "Ring magnet"],
+    "answer": "Magnetic stripe",
+    "explanation": "Credit cards store data in a magnetic stripe.",
+    "topic": "Applications"
+  },
+  {
+    "id": 26,
+    "question": "The process of making a magnet by stroking is called ______?",
+    "image": "",
+    "difficulty": "hard",
+    "options": ["Induction", "Touching", "Stroking", "Rubbing"],
+    "answer": "Induction",
+    "explanation": "Stroking a magnetic material with a magnet induces magnetism.",
+    "topic": "Methods"
+  },
+  {
+    "id": 27,
+    "question": "Which of these is an example of natural magnet?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["Bar magnet", "Horseshoe magnet", "Lodestone", "Electromagnet"],
+    "answer": "Lodestone",
+    "explanation": "Lodestone is a naturally occurring magnetic mineral.",
+    "topic": "Types"
+  },
+  {
+    "id": 28,
+    "question": "Magnets are used in which medical device?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["X-ray machine", "MRI scanner", "Stethoscope", "Thermometer"],
+    "answer": "MRI scanner",
+    "explanation": "MRI scanners use strong magnetic fields for imaging.",
+    "topic": "Applications"
+  },
+  {
+    "id": 29,
+    "question": "What type of materials can be magnetized?",
+    "image": "",
+    "difficulty": "medium",
+    "options": ["Ferromagnetic", "Paramagnetic", "Diamagnetic", "Nonmagnetic"],
+    "answer": "Ferromagnetic",
+    "explanation": "Only ferromagnetic materials can be strongly magnetized.",
+    "topic": "Materials"
+  },
+  {
+    "id": 30,
+    "question": "The area around a magnet where it attracts materials is called?",
+    "image": "",
+    "difficulty": "easy",
+    "options": ["Magnetic field", "Electric field", "Gravitational field", "Heat field"],
+    "answer": "Magnetic field",
+    "explanation": "This region is known as the magnetic field.",
+    "topic": "Field"
+  }
+]
