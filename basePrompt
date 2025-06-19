@@ -1,0 +1,73 @@
+You are building a modern responsive React-based web application called **"Student Magnet Exam Portal"** for Class 6 Science (Chapter: Exploring Magnets). It should include the following functionality and files, structured in a modular open-source way.
+
+### 🔒 Authentication:
+- Use **Firebase Authentication** with Google Sign-In (Gmail only).
+- Store user metadata in Firestore (optional).
+- On login, redirect to a dashboard.
+
+### 🧭 Dashboard: 
+- After login, show a **central dashboard**:
+  - “Start New Exam”
+  - “View Past Reports”
+  - Class-wise subject selection (Class 6 → Science → Chapter → Start)
+
+### 🧠 Question Bank:
+- Load questions from a local **JSON file** (`/data/magnets.json`)
+  - Each question has: `id`, `question`, `image`, `difficulty`, `options`, `answer`, `explanation`, `topic`.
+  - Include at least 30 sample questions ranging from easy to difficult.
+
+### 🧪 Exam Wizard:
+- Build a **step-based wizard** (Next/Previous) to show 10/20/30 MCQs per exam.
+- Support:
+  - Option selection
+  - Progress bar
+  - Skipped questions tracking
+- Submit button at the end generates:
+  - Total score
+  - Per-question ✅/❌
+  - Correct answer with explanation
+  - Allow retry or save report
+
+### 📊 Reports:
+- Store completed exams in browser’s `localStorage` or Firebase (optional)
+- Show class/subject-wise **exam history**
+  - Include timestamp, score, total, difficulty filter
+  - Allow clicking any report to view detailed answers
+
+### ✨ Suggestions & UX:
+- Use **TailwindCSS** or **ShadCN UI** for clean, elegant design
+- Fully mobile responsive
+- Include:
+  - Suggestions at end of exam like “Review Topic: Magnetic Poles”
+  - Option to rate/review a question for improvement
+- Add a motivational quote card for students on the dashboard
+
+### 🔧 Tech Stack:
+- React (TypeScript)
+- Firebase (Auth + optional Firestore)
+- TailwindCSS
+- JSON for Question Bank
+- React Router DOM
+- Icons via Lucide or Tabler
+
+### 📁 File Structure:
+Create the following files:
+1. `/src/App.tsx` – Root router
+2. `/src/pages/Login.tsx` – Gmail sign-in page
+3. `/src/pages/Dashboard.tsx` – Central hub after login
+4. `/src/pages/ExamWizard.tsx` – Handles MCQ rendering and submission
+5. `/src/pages/ReportView.tsx` – List + detail view of past reports
+6. `/src/components/QuestionCard.tsx` – Reusable card for each MCQ
+7. `/src/data/magnets.json` – Static question bank
+8. `/src/utils/storage.ts` – Helper for saving/loading exams
+9. `/src/firebase.ts` – Firebase config + auth functions
+10. `/src/styles/index.css` – Tailwind entry
+11. `/public/index.html` – Main HTML
+
+### 🏁 Final Notes:
+- Ensure accessibility (keyboard support, contrast)
+- Include a loading spinner where needed
+- Comment code clearly for future developers
+- Follow modern React patterns with hooks and state management
+
+Generate all necessary files in a way that the developer can clone and run with:
