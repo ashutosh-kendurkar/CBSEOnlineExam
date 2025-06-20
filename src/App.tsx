@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ExamWizard from './pages/ExamWizard';
 import ReportView from './pages/ReportView';
+import AdminPanel from './pages/AdminPanel';
 import './styles/index.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/exam" element={<ExamWizard />} />
         <Route path="/reports" element={<ReportView />} />
+        <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </Router>
   );
