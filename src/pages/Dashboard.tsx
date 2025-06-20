@@ -1,11 +1,21 @@
 import { useNavigate } from 'react-router-dom';
-import { signOutUser } from '../firebase';
+import { signOutUser, getAdminConfig } from '../firebase';
 import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user] = useAuthState(auth);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function check() {
+      const cfg = await getAdminConfig();
+      if (cfg && user?.email === cfg.email) setIsAdmin(true);
+    }
+    check();
+  }, [user]);
 
   if (!user) return null;
 
@@ -30,6 +40,14 @@ export default function Dashboard() {
       >
         View Past Reports
       </button>
+      {isAdmin && (
+        <button
+          className="block w-full bg-purple-500 text-white py-2 rounded"
+          onClick={() => navigate('/admin')}
+        >
+          Admin Panel
+        </button>
+      )}
     </div>
   );
 }

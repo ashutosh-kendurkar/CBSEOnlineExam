@@ -1,5 +1,11 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,6 +19,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
+export const db = getFirestore(app);
 
 export async function signInWithGoogle() {
   await signInWithPopup(auth, provider);
@@ -20,4 +27,9 @@ export async function signInWithGoogle() {
 
 export async function signOutUser() {
   await signOut(auth);
+}
+
+export async function getAdminConfig() {
+  const snap = await getDoc(doc(db, 'roles', 'admin'));
+  return snap.exists() ? (snap.data() as { email: string; route: string }) : null;
 }
