@@ -1,14 +1,22 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, signInWithGoogle } from '../firebase';
+import { auth, signInWithGoogle, checkPreviewAccess, signOutUser } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, user => {
-      if (user) navigate('/dashboard');
+    const unsub = onAuthStateChanged(auth, async user => {
+      if (user) {
+        const ok = await checkPreviewAccess(user.email || '');
+        if (ok) {
+          navigate('/dashboard');
+        } else {
+          await signOutUser();
+          alert('Preview access expired or not granted');
+        }
+      }
     });
     return unsub;
   }, [navigate]);
