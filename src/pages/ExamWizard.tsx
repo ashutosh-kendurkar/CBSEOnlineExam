@@ -252,19 +252,21 @@ export default function ExamWizard() {
   }
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
-      <div className="flex justify-between mb-4">
-        <span>Question {current + 1} / {total}</span>
-        <button onClick={cancel} className="text-sm underline">Cancel</button>
-      </div>
-      <QuestionCard question={currentQ} selected={answers[current]} onSelect={handleSelect} />
-      <div className="flex justify-between mt-4">
-        <button onClick={prev} disabled={current === 0} className="px-4 py-2 bg-gray-300 rounded">Previous</button>
-        {current < total - 1 ? (
-          <button onClick={next} className="px-4 py-2 bg-blue-500 text-white rounded">Next</button>
-        ) : (
-          <button onClick={submit} className="px-4 py-2 bg-green-500 text-white rounded">Submit</button>
-        )}
+    <div className="min-h-screen p-4 bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 flex justify-center">
+      <div className="max-w-xl w-full">
+        <div className="flex justify-between mb-4">
+          <span>Question {current + 1} / {total}</span>
+          <button onClick={cancel} className="text-sm underline">Cancel</button>
+        </div>
+        <QuestionCard question={currentQ} selected={answers[current]} onSelect={handleSelect} />
+        <div className="flex justify-between mt-4">
+          <button onClick={prev} disabled={current === 0} className="px-4 py-2 bg-gray-300 rounded">Previous</button>
+          {current < total - 1 ? (
+            <button onClick={next} className="px-4 py-2 bg-blue-500 text-white rounded">Next</button>
+          ) : (
+            <button onClick={submit} className="px-4 py-2 bg-green-500 text-white rounded">Submit</button>
+          )}
+        </div>
       </div>
     </div>
   );
