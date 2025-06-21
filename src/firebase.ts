@@ -5,7 +5,13 @@ import {
   signInWithPopup,
   signOut,
 } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  Timestamp,
+} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -32,4 +38,22 @@ export async function signOutUser() {
 export async function getAdminConfig() {
   const snap = await getDoc(doc(db, 'roles', 'admin'));
   return snap.exists() ? (snap.data() as { email: string; route: string }) : null;
+}
+
+export async function checkPreviewAccess(email: string) {
+  const snap = await getDoc(doc(db, 'preview_users', email));
+  if (!snap.exists()) return false;
+  const data = snap.data() as { allowed: boolean; expiresAt: Timestamp };
+  return (
+    data.allowed &&
+    data.expiresAt.toMillis() > Date.now()
+  );
+}
+
+export async function addPreviewUser(email: string, expiresAt: Date) {
+  await setDoc(doc(db, 'preview_users', email), {
+    userEmail: email,
+    allowed: true,
+    expiresAt: Timestamp.fromDate(expiresAt),
+  });
 }

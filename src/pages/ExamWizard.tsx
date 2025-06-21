@@ -218,7 +218,7 @@ export default function ExamWizard() {
                   <td className="border px-2 py-1 text-center">{q.difficulty_level}</td>
                   <td className="border px-2 py-1">
                     <ul className="list-disc ml-4">
-                      {q.options.map(opt => (
+                      {q.options.map((opt: string) => (
                         <li
                           key={opt}
                           className={opt === q.answer ? 'font-semibold bg-green-100' : ''}

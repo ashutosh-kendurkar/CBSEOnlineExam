@@ -10,7 +10,7 @@ import {
   deleteDoc,
   writeBatch,
 } from 'firebase/firestore';
-import { auth, db, getAdminConfig } from '../firebase';
+import { auth, db, getAdminConfig, addPreviewUser } from '../firebase';
 import Toast from '../components/Toast';
 
 interface Question {
@@ -50,6 +50,10 @@ export default function AdminPanel() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [previewEmail, setPreviewEmail] = useState('');
+  const [expiry, setExpiry] = useState('');
 
   const navigate = useNavigate();
 
@@ -317,7 +321,7 @@ export default function AdminPanel() {
         'questions',
         id
       ),
-      updated
+      updated as any
     );
     loadQuestions(selectedLesson);
   };
@@ -360,6 +364,15 @@ export default function AdminPanel() {
     });
     await batch.commit();
     loadQuestions(selectedLesson);
+  };
+
+  const invitePreview = async () => {
+    if (!previewEmail || !expiry) return;
+    await addPreviewUser(previewEmail.trim(), new Date(expiry));
+    setPreviewEmail('');
+    setExpiry('');
+    setInviteOpen(false);
+    showToast('Preview user invited');
   };
 
   if (!user) return null;
@@ -409,6 +422,35 @@ export default function AdminPanel() {
             className="bg-blue-500 text-white px-4 py-2 rounded"
           >
             Add
+          </button>
+          <button
+            onClick={() => setInviteOpen(o => !o)}
+            className="bg-purple-500 text-white px-4 py-2 rounded"
+          >
+            {inviteOpen ? 'Cancel' : 'Invite Preview User'}
+          </button>
+        </div>
+      )}
+      {inviteOpen && (
+        <div className="space-x-2">
+          <input
+            type="email"
+            className="border p-2 rounded"
+            placeholder="User Email"
+            value={previewEmail}
+            onChange={e => setPreviewEmail(e.target.value)}
+          />
+          <input
+            type="date"
+            className="border p-2 rounded"
+            value={expiry}
+            onChange={e => setExpiry(e.target.value)}
+          />
+          <button
+            onClick={invitePreview}
+            className="bg-green-500 text-white px-4 py-2 rounded"
+          >
+            Save
           </button>
         </div>
       )}
