@@ -3,7 +3,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import fallbackQuestions from '../data/magnets.json';
 import QuestionCard from '../components/QuestionCard';
-import { saveReport } from '../utils/storage';
+import { saveReport, loadReports } from '../utils/storage';
 import { v4 as uuid } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 
@@ -59,12 +59,28 @@ export default function ExamWizard() {
             image: q.image || ''
           }));
         }
+
+        const reports = loadReports();
+        const attempted = new Set<string | number>();
+        reports.forEach(r => {
+          r.details.forEach((d: any) => {
+            if (d.id !== undefined && d.id !== null) attempted.add(d.id);
+          });
+        });
+        const last = reports[reports.length - 1];
+        const failed = new Set<string | number>();
+        if (last) {
+          last.details.forEach((d: any) => {
+            if (d.id !== undefined && d.selected !== d.correct) failed.add(d.id);
+          });
+        }
+        data = data.filter(q => failed.has(q.id) || !attempted.has(q.id));
         const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
         data.sort((a, b) => order.indexOf(a.difficulty_level) - order.indexOf(b.difficulty_level));
         setExamQs(data.slice(0, 10));
       } catch (e) {
         console.error('Failed to load questions from Firestore, using fallback.', e);
-        const data = fallbackQuestions.map(q => ({
+        let data = fallbackQuestions.map(q => ({
           id: q.id,
           question: q.question,
           options: q.options,
@@ -73,6 +89,21 @@ export default function ExamWizard() {
           difficulty_level: q.difficulty_level.charAt(0).toUpperCase() + q.difficulty_level.slice(1),
           image: q.image || ''
         }));
+        const reports = loadReports();
+        const attempted = new Set<string | number>();
+        reports.forEach(r => {
+          r.details.forEach((d: any) => {
+            if (d.id !== undefined && d.id !== null) attempted.add(d.id);
+          });
+        });
+        const last = reports[reports.length - 1];
+        const failed = new Set<string | number>();
+        if (last) {
+          last.details.forEach((d: any) => {
+            if (d.id !== undefined && d.selected !== d.correct) failed.add(d.id);
+          });
+        }
+        data = data.filter(q => failed.has(q.id) || !attempted.has(q.id));
         const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
         data.sort((a, b) => order.indexOf(a.difficulty_level) - order.indexOf(b.difficulty_level));
         setExamQs(data.slice(0, 10));
@@ -102,6 +133,7 @@ export default function ExamWizard() {
       score,
       total,
       details: examQs.map((q, idx) => ({
+        id: q.id,
         question: q.question,
         selected: answers[idx],
         correct: q.answer,
