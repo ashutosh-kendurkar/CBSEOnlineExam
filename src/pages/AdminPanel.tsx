@@ -23,7 +23,7 @@ interface Question {
   lesson_number: number;
   lesson_name: string;
   image_url: string;
-  difficulty_level: 'Easy' | 'Medium' | 'Hard';
+  difficulty_level: 'Easy' | 'Medium' | 'Hard' | 'Over-achiever';
 }
 
 interface QuestionDoc extends Question {
@@ -191,10 +191,10 @@ export default function AdminPanel() {
     if (q.image_url !== undefined && typeof q.image_url !== 'string') {
       return { valid: false, error: 'image_url must be a string if provided' };
     }
-    if (!['Easy', 'Medium', 'Hard'].includes(q.difficulty_level)) {
+    if (!['Easy', 'Medium', 'Hard', 'Over-achiever'].includes(q.difficulty_level)) {
       return {
         valid: false,
-        error: 'difficulty_level must be Easy, Medium or Hard',
+        error: 'difficulty_level must be Easy, Medium, Hard or Over-achiever',
       };
     }
     return { valid: true };
@@ -247,7 +247,9 @@ export default function AdminPanel() {
     const options = optionsInput.split(',').map(o => o.trim()).filter(Boolean);
     const correct_answer = prompt('Correct answer?') || '';
     const explanation = prompt('Explanation?') || '';
-    const difficulty_level = (prompt('Difficulty (Easy/Medium/Hard)?', 'Easy') || 'Easy') as 'Easy' | 'Medium' | 'Hard';
+    const difficulty_level = (
+      prompt('Difficulty (Easy/Medium/Hard/Over-achiever)?', 'Easy') || 'Easy'
+    ) as 'Easy' | 'Medium' | 'Hard' | 'Over-achiever';
     const q: Question = {
       question,
       options,
@@ -289,7 +291,10 @@ export default function AdminPanel() {
     const options = optionsInput.split(',').map(o => o.trim()).filter(Boolean);
     const correct_answer = prompt('Correct answer?', q.correct_answer) || q.correct_answer;
     const explanation = prompt('Explanation?', q.explanation) || q.explanation;
-    const difficulty_level = (prompt('Difficulty (Easy/Medium/Hard)?', q.difficulty_level) || q.difficulty_level) as 'Easy' | 'Medium' | 'Hard';
+    const difficulty_level = (
+      prompt('Difficulty (Easy/Medium/Hard/Over-achiever)?', q.difficulty_level) ||
+      q.difficulty_level
+    ) as 'Easy' | 'Medium' | 'Hard' | 'Over-achiever';
     const updated: Question = { ...q, question, options, correct_answer, explanation, difficulty_level };
     const res = validateQuestion(updated);
     if (!res.valid) return showToast(res.error || 'Invalid data');
