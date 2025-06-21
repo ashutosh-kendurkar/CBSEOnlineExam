@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import {
   collection,
   doc,
   getDocs,
   setDoc,
-  addDoc,
+  updateDoc,
+  deleteDoc,
   writeBatch,
 } from 'firebase/firestore';
 import { auth, db, getAdminConfig } from '../firebase';
@@ -24,33 +25,24 @@ interface Question {
 export default function AdminPanel() {
   const [user] = useAuthState(auth);
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
-  const [classes, setClasses] = useState<string[]>([]);
-  const [subjects, setSubjects] = useState<string[]>([]);
-  const [selectedClass, setSelectedClass] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [newClass, setNewClass] = useState('');
-  const [newSubject, setNewSubject] = useState('');
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [file, setFile] = useState<File | null>(null);
+
+  const [classes, setClasses] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [lessons, setLessons] = useState<any[]>([]);
+
+  const [view, setView] = useState<'classes' | 'subjects' | 'lessons'>('classes');
+  const [selectedClass, setSelectedClass] = useState<string>('');
+  const [selectedSubject, setSelectedSubject] = useState<string>('');
+
+  const [newItem, setNewItem] = useState('');
   const [toast, setToast] = useState('');
-  const [newQ, setNewQ] = useState({
-    question: '',
-    optionA: '',
-    optionB: '',
-    optionC: '',
-    optionD: '',
-    answer: '',
-    explanation: '',
-    difficulty: 'easy',
-  });
+
   const navigate = useNavigate();
 
-  function showToast(msg: string) {
-    setToast(msg);
-  }
+  const showToast = (msg: string) => setToast(msg);
 
   useEffect(() => {
-    getAdminConfig().then((cfg) => setAdminEmail(cfg?.email ?? null));
+    getAdminConfig().then(cfg => setAdminEmail(cfg?.email ?? null));
   }, []);
 
   useEffect(() => {
@@ -59,54 +51,82 @@ export default function AdminPanel() {
 
   async function loadClasses() {
     const snap = await getDocs(collection(db, 'classes'));
-    setClasses(snap.docs.map((d) => d.id));
+    setClasses(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
   }
 
   async function loadSubjects(cls: string) {
     const snap = await getDocs(collection(db, 'classes', cls, 'subjects'));
-    setSubjects(snap.docs.map((d) => d.id));
+    setSubjects(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
   }
 
-  async function loadQuestions(cls: string, sub: string) {
-    const snap = await getDocs(
-      collection(db, 'classes', cls, 'subjects', sub, 'questions')
-    );
-    setQuestions(snap.docs.map((d) => d.data() as Question));
+  async function loadLessons(cls: string, sub: string) {
+    const snap = await getDocs(collection(db, 'classes', cls, 'subjects', sub, 'lessons'));
+    setLessons(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
   }
 
-  useEffect(() => {
-    if (selectedClass) {
+  const addItem = async () => {
+    const name = newItem.trim();
+    if (!name) return;
+    if (view === 'classes') {
+      await setDoc(doc(db, 'classes', name), { name });
+      loadClasses();
+    } else if (view === 'subjects') {
+      await setDoc(doc(db, 'classes', selectedClass, 'subjects', name), { name });
       loadSubjects(selectedClass);
-      setSelectedSubject('');
-      setQuestions([]);
+    } else {
+      await setDoc(
+        doc(db, 'classes', selectedClass, 'subjects', selectedSubject, 'lessons', name),
+        { name }
+      );
+      loadLessons(selectedClass, selectedSubject);
     }
-  }, [selectedClass]);
-
-  useEffect(() => {
-    if (selectedClass && selectedSubject) {
-      loadQuestions(selectedClass, selectedSubject);
-    }
-  }, [selectedSubject]);
-
-  const handleAddClass = async () => {
-    const name = newClass.trim();
-    if (!name) return showToast('Class name required');
-    if (classes.includes(name)) return showToast('Class already exists');
-    await setDoc(doc(db, 'classes', name), { name });
-    setNewClass('');
-    loadClasses();
-    showToast('Class added');
+    setNewItem('');
   };
 
-  const handleAddSubject = async () => {
-    const name = newSubject.trim();
-    if (!selectedClass) return showToast('Select a class first');
-    if (!name) return showToast('Subject name required');
-    if (subjects.includes(name)) return showToast('Subject already exists');
-    await setDoc(doc(db, 'classes', selectedClass, 'subjects', name), { name });
-    setNewSubject('');
-    loadSubjects(selectedClass);
-    showToast('Subject added');
+  const modifyItem = async (id: string) => {
+    const name = prompt('New name?');
+    if (!name) return;
+    if (view === 'classes') {
+      await updateDoc(doc(db, 'classes', id), { name });
+      loadClasses();
+    } else if (view === 'subjects') {
+      await updateDoc(doc(db, 'classes', selectedClass, 'subjects', id), { name });
+      loadSubjects(selectedClass);
+    } else {
+      await updateDoc(
+        doc(db, 'classes', selectedClass, 'subjects', selectedSubject, 'lessons', id),
+        { name }
+      );
+      loadLessons(selectedClass, selectedSubject);
+    }
+  };
+
+  const deleteItem = async (id: string) => {
+    if (!confirm('Delete?')) return;
+    if (view === 'classes') {
+      await deleteDoc(doc(db, 'classes', id));
+      loadClasses();
+    } else if (view === 'subjects') {
+      await deleteDoc(doc(db, 'classes', selectedClass, 'subjects', id));
+      loadSubjects(selectedClass);
+    } else {
+      await deleteDoc(
+        doc(db, 'classes', selectedClass, 'subjects', selectedSubject, 'lessons', id)
+      );
+      loadLessons(selectedClass, selectedSubject);
+    }
+  };
+
+  const goToSubjects = (id: string) => {
+    setSelectedClass(id);
+    loadSubjects(id);
+    setView('subjects');
+  };
+
+  const goToLessons = (id: string) => {
+    setSelectedSubject(id);
+    loadLessons(selectedClass, id);
+    setView('lessons');
   };
 
   const validateQuestion = (q: Question) => {
@@ -121,10 +141,8 @@ export default function AdminPanel() {
     );
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (lessonId: string, file: File | null) => {
     if (!file) return showToast('No file selected');
-    if (!selectedClass || !selectedSubject)
-      return showToast('Select class and subject');
     let parsed: unknown;
     try {
       parsed = JSON.parse(await file.text());
@@ -137,50 +155,23 @@ export default function AdminPanel() {
       if (!validateQuestion(q)) return showToast('Invalid question schema');
     }
     const batch = writeBatch(db);
-    qs.forEach((q) => {
+    qs.forEach(q => {
       const ref = doc(
-        collection(db, 'classes', selectedClass, 'subjects', selectedSubject, 'questions')
+        collection(
+          db,
+          'classes',
+          selectedClass,
+          'subjects',
+          selectedSubject,
+          'lessons',
+          lessonId,
+          'questions'
+        )
       );
       batch.set(ref, q);
     });
     await batch.commit();
-    setFile(null);
-    loadQuestions(selectedClass, selectedSubject);
     showToast('Questions uploaded');
-  };
-
-  const handleAddQuestion = async () => {
-    if (!selectedClass || !selectedSubject)
-      return showToast('Select class and subject');
-    const opts = [newQ.optionA, newQ.optionB, newQ.optionC, newQ.optionD].map((o) => o.trim()).filter(Boolean);
-    if (!newQ.question.trim() || opts.length < 2 || !newQ.answer.trim())
-      return showToast('Please fill all fields');
-    if (!opts.includes(newQ.answer))
-      return showToast('Answer must match one option');
-    const q: Question = {
-      id: Date.now(),
-      question: newQ.question,
-      options: opts,
-      answer: newQ.answer,
-      explanation: newQ.explanation,
-      difficulty: newQ.difficulty as 'easy' | 'medium' | 'hard',
-    };
-    await addDoc(
-      collection(db, 'classes', selectedClass, 'subjects', selectedSubject, 'questions'),
-      q
-    );
-    setNewQ({
-      question: '',
-      optionA: '',
-      optionB: '',
-      optionC: '',
-      optionD: '',
-      answer: '',
-      explanation: '',
-      difficulty: 'easy',
-    });
-    loadQuestions(selectedClass, selectedSubject);
-    showToast('Question added');
   };
 
   if (!user) return null;
@@ -189,177 +180,84 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="p-4 space-y-6 max-w-2xl mx-auto">
+    <div className="p-4 space-y-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold">Admin Panel</h1>
-
+      {view !== 'classes' && (
+        <button className="underline" onClick={() => {
+          if (view === 'lessons') {
+            setView('subjects');
+          } else {
+            setView('classes');
+          }
+        }}>Back</button>
+      )}
       <div className="space-x-2">
         <input
           className="border p-2 rounded"
           type="text"
-          placeholder="New class name"
-          value={newClass}
-          onChange={(e) => setNewClass(e.target.value)}
+          placeholder={`New ${view.slice(0, -1)}`}
+          value={newItem}
+          onChange={e => setNewItem(e.target.value)}
         />
-        <button
-          onClick={handleAddClass}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Add Class
+        <button onClick={addItem} className="bg-blue-500 text-white px-4 py-2 rounded">
+          Add
         </button>
       </div>
-
-      <div className="space-x-2">
-        <select
-          className="border p-2 rounded"
-          value={selectedClass}
-          onChange={(e) => setSelectedClass(e.target.value)}
-        >
-          <option value="">Select Class</option>
-          {classes.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <input
-          className="border p-2 rounded"
-          type="text"
-          placeholder="New subject"
-          value={newSubject}
-          onChange={(e) => setNewSubject(e.target.value)}
-        />
-        <button
-          onClick={handleAddSubject}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Add Subject
-        </button>
-      </div>
-
-      {selectedClass && (
-        <div className="space-x-2">
-          <select
-            className="border p-2 rounded"
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-          >
-            <option value="">Select Subject</option>
-            {subjects.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {selectedSubject && (
-        <div className="space-y-4">
-          <div className="border p-4 rounded space-y-2">
-            <h2 className="font-semibold">Upload Questions</h2>
-            <input
-              type="file"
-              accept="application/json"
-              onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-              className="block"
-            />
-            <button
-              onClick={handleUpload}
-              className="bg-green-500 text-white px-4 py-2 rounded mt-2"
-            >
-              Upload
-            </button>
-          </div>
-
-          <div className="border p-4 rounded space-y-2">
-            <h2 className="font-semibold">Add Question</h2>
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Question"
-              value={newQ.question}
-              onChange={(e) => setNewQ({ ...newQ, question: e.target.value })}
-            />
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Option A"
-              value={newQ.optionA}
-              onChange={(e) => setNewQ({ ...newQ, optionA: e.target.value })}
-            />
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Option B"
-              value={newQ.optionB}
-              onChange={(e) => setNewQ({ ...newQ, optionB: e.target.value })}
-            />
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Option C"
-              value={newQ.optionC}
-              onChange={(e) => setNewQ({ ...newQ, optionC: e.target.value })}
-            />
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Option D"
-              value={newQ.optionD}
-              onChange={(e) => setNewQ({ ...newQ, optionD: e.target.value })}
-            />
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Correct Answer"
-              value={newQ.answer}
-              onChange={(e) => setNewQ({ ...newQ, answer: e.target.value })}
-            />
-            <input
-              className="border p-2 rounded w-full"
-              placeholder="Explanation"
-              value={newQ.explanation}
-              onChange={(e) => setNewQ({ ...newQ, explanation: e.target.value })}
-            />
-            <select
-              className="border p-2 rounded w-full"
-              value={newQ.difficulty}
-              onChange={(e) =>
-                setNewQ({ ...newQ, difficulty: e.target.value })
-              }
-            >
-              <option value="easy">easy</option>
-              <option value="medium">medium</option>
-              <option value="hard">hard</option>
-            </select>
-            <button
-              onClick={handleAddQuestion}
-              className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
-            >
-              Add Question
-            </button>
-          </div>
-        </div>
-      )}
-
-      {questions.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-xl font-semibold">Questions</h2>
-          {questions.map((q, idx) => (
-            <details key={idx} className="border rounded">
-              <summary className="cursor-pointer p-2">
-                {q.question}
-              </summary>
-              <div className="p-2 space-y-1">
-                {q.options.map((o) => (
-                  <div key={o}>• {o}</div>
-                ))}
-                <div className="text-green-700 font-semibold">Answer: {q.answer}</div>
-                <div className="text-sm italic">{q.explanation}</div>
+      {view === 'classes' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {classes.map(c => (
+            <div key={c.id} className="border p-2 flex justify-between items-center">
+              <Link to="#" onClick={() => goToSubjects(c.id)} className="text-blue-600 underline">
+                {c.name || c.id}
+              </Link>
+              <div className="space-x-2 text-sm">
+                <button onClick={() => modifyItem(c.id)} className="text-green-700">Modify</button>
+                <button onClick={() => deleteItem(c.id)} className="text-red-600">Delete</button>
               </div>
-            </details>
+            </div>
           ))}
         </div>
       )}
-
-      <button onClick={() => navigate('/dashboard')} className="underline">
+      {view === 'subjects' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {subjects.map(s => (
+            <div key={s.id} className="border p-2 flex justify-between items-center">
+              <Link to="#" onClick={() => goToLessons(s.id)} className="text-blue-600 underline">
+                {s.name || s.id}
+              </Link>
+              <div className="space-x-2 text-sm">
+                <button onClick={() => modifyItem(s.id)} className="text-green-700">Modify</button>
+                <button onClick={() => deleteItem(s.id)} className="text-red-600">Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {view === 'lessons' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {lessons.map(l => (
+            <div key={l.id} className="border p-2 space-y-2">
+              <div className="flex justify-between items-center">
+                <span>{l.name || l.id}</span>
+                <div className="space-x-2 text-sm">
+                  <button onClick={() => modifyItem(l.id)} className="text-green-700">Modify</button>
+                  <button onClick={() => deleteItem(l.id)} className="text-red-600">Delete</button>
+                </div>
+              </div>
+              <div>
+                <input
+                  type="file"
+                  accept="application/json"
+                  onChange={e => handleUpload(l.id, e.target.files ? e.target.files[0] : null)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <button onClick={() => navigate("/dashboard")} className="underline">
         Back to Dashboard
       </button>
-
       <Toast message={toast} show={!!toast} onClose={() => setToast('')} />
     </div>
   );
