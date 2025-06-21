@@ -10,6 +10,8 @@ export interface ExamDetail {
 export interface ExamReport {
   id: string;
   timestamp: number;
+  /** Subject for which the exam was attempted */
+  subject: string;
   score: number;
   total: number;
   details: ExamDetail[];
@@ -25,5 +27,10 @@ export function saveReport(report: ExamReport) {
 
 export function loadReports(): ExamReport[] {
   const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? (JSON.parse(raw) as ExamReport[]) : [];
+  if (!raw) return [];
+  const parsed: any[] = JSON.parse(raw);
+  return parsed.map(r => ({
+    subject: r.subject || 'unknown',
+    ...r
+  })) as ExamReport[];
 }
