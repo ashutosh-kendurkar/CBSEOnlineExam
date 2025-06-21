@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, startAt, limit } from 'firebase/firestore';
 import { db } from '../firebase';
 import fallbackQuestions from '../data/magnets.json';
 import QuestionCard from '../components/QuestionCard';
@@ -46,21 +46,34 @@ export default function ExamWizard() {
 
         let data: any[] = [];
         for (const lesson of lessonIds) {
-          const snap = await getDocs(
-            query(
-              collection(
-                db,
-                'classes',
-                '6',
-                'subjects',
-                subject,
-                'lessons',
-                lesson,
-                'questions'
-              ),
-              orderBy('random')
-            )
+          const baseRef = collection(
+            db,
+            'classes',
+            '6',
+            'subjects',
+            subject,
+            'lessons',
+            lesson,
+            'questions'
           );
+
+          const rand = Math.random();
+          // Start at a random point in the collection using the `random` field
+          let snap = await getDocs(
+            query(baseRef, orderBy('random'), startAt(rand), limit(10))
+          );
+
+          // If there are not enough documents after the start point, wrap
+          if (snap.size < 10) {
+            const remaining = 10 - snap.size;
+            const additional = await getDocs(
+              query(baseRef, orderBy('random'), limit(remaining))
+            );
+            snap = {
+              docs: [...snap.docs, ...additional.docs]
+            } as any;
+          }
+
           snap.docs.forEach(d => {
             const q = d.data() as any;
             data.push({
