@@ -161,20 +161,43 @@ export default function AdminPanel() {
     setView('questions');
   };
 
-  const validateQuestion = (q: Question) => {
-    return (
-      typeof q.question === 'string' &&
-      Array.isArray(q.options) &&
-      q.options.length > 0 &&
-      typeof q.correct_answer === 'string' &&
-      typeof q.explanation === 'string' &&
-      typeof q.class === 'number' &&
-      typeof q.subject === 'string' &&
-      typeof q.lesson_number === 'number' &&
-      typeof q.lesson_name === 'string' &&
-      (q.image_url === undefined || typeof q.image_url === 'string') &&
-      ['Easy', 'Medium', 'Hard'].includes(q.difficulty_level)
-    );
+  const validateQuestion = (
+    q: Question
+  ): { valid: boolean; error?: string } => {
+    if (typeof q.question !== 'string' || !q.question.trim()) {
+      return { valid: false, error: 'Missing question text' };
+    }
+    if (!Array.isArray(q.options) || q.options.length === 0) {
+      return { valid: false, error: 'Options must be a non-empty array' };
+    }
+    if (typeof q.correct_answer !== 'string') {
+      return { valid: false, error: 'Missing correct_answer field' };
+    }
+    if (typeof q.explanation !== 'string') {
+      return { valid: false, error: 'Missing explanation field' };
+    }
+    if (typeof q.class !== 'number') {
+      return { valid: false, error: 'Class must be a number' };
+    }
+    if (typeof q.subject !== 'string') {
+      return { valid: false, error: 'Subject must be a string' };
+    }
+    if (typeof q.lesson_number !== 'number') {
+      return { valid: false, error: 'lesson_number must be a number' };
+    }
+    if (typeof q.lesson_name !== 'string') {
+      return { valid: false, error: 'lesson_name must be a string' };
+    }
+    if (q.image_url !== undefined && typeof q.image_url !== 'string') {
+      return { valid: false, error: 'image_url must be a string if provided' };
+    }
+    if (!['Easy', 'Medium', 'Hard'].includes(q.difficulty_level)) {
+      return {
+        valid: false,
+        error: 'difficulty_level must be Easy, Medium or Hard',
+      };
+    }
+    return { valid: true };
   };
 
   const handleUpload = async (lessonId: string, file: File | null) => {
@@ -187,8 +210,11 @@ export default function AdminPanel() {
     }
     if (!Array.isArray(parsed)) return showToast('File should be an array');
     const qs = parsed as Question[];
-    for (const q of qs) {
-      if (!validateQuestion(q)) return showToast('Invalid question schema');
+    for (const [idx, q] of qs.entries()) {
+      const res = validateQuestion(q);
+      if (!res.valid) {
+        return showToast(`Error in question ${idx + 1}: ${res.error}`);
+      }
     }
     const batch = writeBatch(db);
     qs.forEach(q => {
@@ -234,7 +260,8 @@ export default function AdminPanel() {
       image_url: '',
       difficulty_level
     };
-    if (!validateQuestion(q)) return showToast('Invalid data');
+    const res = validateQuestion(q);
+    if (!res.valid) return showToast(res.error || 'Invalid data');
     await setDoc(
       doc(
         collection(
@@ -264,7 +291,8 @@ export default function AdminPanel() {
     const explanation = prompt('Explanation?', q.explanation) || q.explanation;
     const difficulty_level = (prompt('Difficulty (Easy/Medium/Hard)?', q.difficulty_level) || q.difficulty_level) as 'Easy' | 'Medium' | 'Hard';
     const updated: Question = { ...q, question, options, correct_answer, explanation, difficulty_level };
-    if (!validateQuestion(updated)) return showToast('Invalid data');
+    const res = validateQuestion(updated);
+    if (!res.valid) return showToast(res.error || 'Invalid data');
     await updateDoc(
       doc(
         db,

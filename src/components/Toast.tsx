@@ -17,8 +17,9 @@ export default function Toast({ message, show, onClose }: ToastProps) {
   if (!show) return null;
 
   return (
-    <div className="fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow">
-      {message}
+    <div className="fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow flex items-start">
+      <span className="flex-1">{message}</span>
+      <button onClick={onClose} className="ml-2 text-white">&#10005;</button>
     </div>
   );
 }
