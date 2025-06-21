@@ -46,6 +46,9 @@ export default function AdminPanel() {
 
   const [newItem, setNewItem] = useState('');
   const [toast, setToast] = useState('');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const navigate = useNavigate();
 
@@ -88,6 +91,7 @@ export default function AdminPanel() {
       )
     );
     setQuestions(snap.docs.map(d => ({ id: d.id, ...(d.data() as Question) })));
+    setPage(1);
   }
 
   const addItem = async () => {
@@ -338,6 +342,15 @@ export default function AdminPanel() {
     return <div className="p-4">Unauthorized</div>;
   }
 
+  const filteredQuestions = questions.filter(q =>
+    q.question.toLowerCase().includes(search.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredQuestions.length / pageSize) || 1;
+  const paginated = filteredQuestions.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   return (
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold">Admin Panel</h1>
@@ -429,13 +442,26 @@ export default function AdminPanel() {
       )}
       {view === 'questions' && (
         <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span>Total Questions: {filteredQuestions.length}</span>
+            <input
+              type="text"
+              className="border p-1 rounded"
+              placeholder="Search"
+              value={search}
+              onChange={e => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
           <button
             onClick={addQuestion}
             className="bg-blue-500 text-white px-4 py-2 rounded"
           >
             Add Question
           </button>
-          {questions.map(q => (
+          {paginated.map(q => (
             <div key={q.id} className="border p-2 flex justify-between items-start">
               <span>{q.question}</span>
               <div className="space-x-2 text-sm">
@@ -444,6 +470,23 @@ export default function AdminPanel() {
               </div>
             </div>
           ))}
+          <div className="flex justify-between items-center">
+            <button
+              disabled={page === 1}
+              className="px-2 py-1 border rounded"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+            >
+              Prev
+            </button>
+            <span>Page {page} / {totalPages}</span>
+            <button
+              disabled={page === totalPages}
+              className="px-2 py-1 border rounded"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
       <button onClick={() => navigate("/dashboard")} className="underline">
