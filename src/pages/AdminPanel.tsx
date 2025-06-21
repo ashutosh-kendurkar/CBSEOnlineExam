@@ -172,7 +172,7 @@ export default function AdminPanel() {
       typeof q.subject === 'string' &&
       typeof q.lesson_number === 'number' &&
       typeof q.lesson_name === 'string' &&
-      typeof q.image_url === 'string' &&
+      (q.image_url === undefined || typeof q.image_url === 'string') &&
       ['Easy', 'Medium', 'Hard'].includes(q.difficulty_level)
     );
   };
