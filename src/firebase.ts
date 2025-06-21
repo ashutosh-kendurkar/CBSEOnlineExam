@@ -40,8 +40,8 @@ export async function getAdminConfig() {
   return snap.exists() ? (snap.data() as { email: string; route: string }) : null;
 }
 
-export async function checkPreviewAccess(email: string) {
-  const snap = await getDoc(doc(db, 'preview_users', email));
+export async function checkPreviewAccess(userEmail: string) {
+  const snap = await getDoc(doc(db, 'preview_users', userEmail));
   if (!snap.exists()) return false;
   const data = snap.data() as { allowed: boolean; expiresAt: Timestamp };
   return (
@@ -50,9 +50,9 @@ export async function checkPreviewAccess(email: string) {
   );
 }
 
-export async function addPreviewUser(email: string, expiresAt: Date) {
-  await setDoc(doc(db, 'preview_users', email), {
-    userEmail: email,
+export async function addPreviewUser(userEmail: string, expiresAt: Date) {
+  await setDoc(doc(db, 'preview_users', userEmail), {
+    userEmail,
     allowed: true,
     expiresAt: Timestamp.fromDate(expiresAt),
   });
