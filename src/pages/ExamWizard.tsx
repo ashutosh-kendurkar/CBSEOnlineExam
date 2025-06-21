@@ -169,6 +169,7 @@ export default function ExamWizard() {
     const report = {
       id: uuid(),
       timestamp: Date.now(),
+      subject,
       score,
       total,
       details: examQs.map((q, idx) => ({
