@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import fallbackQuestions from '../data/magnets.json';
 import QuestionCard from '../components/QuestionCard';
 import { saveReport } from '../utils/storage';
 import { v4 as uuid } from 'uuid';
@@ -22,34 +23,62 @@ export default function ExamWizard() {
 
   useEffect(() => {
     async function load() {
-      const snap = await getDocs(
-        collection(
-          db,
-          'classes',
-          '6',
-          'subjects',
-          'science',
-          'lessons',
-          'exploring-magnets',
-          'questions'
-        )
-      );
-      const data = snap.docs.map(d => {
-        const q = d.data() as any;
-        return {
-          id: d.id,
+      try {
+        const snap = await getDocs(
+          collection(
+            db,
+            'classes',
+            '6',
+            'subjects',
+            'science',
+            'lessons',
+            'exploring-magnets',
+            'questions'
+          )
+        );
+        let data = snap.docs.map(d => {
+          const q = d.data() as any;
+          return {
+            id: d.id,
+            question: q.question,
+            options: q.options,
+            answer: q.correct_answer,
+            explanation: q.explanation,
+            difficulty_level: q.difficulty_level,
+            image: q.image_url || ''
+          };
+        });
+        if (data.length === 0) {
+          data = fallbackQuestions.map(q => ({
+            id: q.id,
+            question: q.question,
+            options: q.options,
+            answer: q.answer,
+            explanation: q.explanation,
+            difficulty_level: q.difficulty_level.charAt(0).toUpperCase() + q.difficulty_level.slice(1),
+            image: q.image || ''
+          }));
+        }
+        const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
+        data.sort((a, b) => order.indexOf(a.difficulty_level) - order.indexOf(b.difficulty_level));
+        setExamQs(data.slice(0, 10));
+      } catch (e) {
+        console.error('Failed to load questions from Firestore, using fallback.', e);
+        const data = fallbackQuestions.map(q => ({
+          id: q.id,
           question: q.question,
           options: q.options,
-          answer: q.correct_answer,
+          answer: q.answer,
           explanation: q.explanation,
-          difficulty_level: q.difficulty_level,
-          image: q.image_url || ''
-        };
-      });
-      const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
-      data.sort((a, b) => order.indexOf(a.difficulty_level) - order.indexOf(b.difficulty_level));
-      setExamQs(data.slice(0, 10));
-      setLoading(false);
+          difficulty_level: q.difficulty_level.charAt(0).toUpperCase() + q.difficulty_level.slice(1),
+          image: q.image || ''
+        }));
+        const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
+        data.sort((a, b) => order.indexOf(a.difficulty_level) - order.indexOf(b.difficulty_level));
+        setExamQs(data.slice(0, 10));
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
