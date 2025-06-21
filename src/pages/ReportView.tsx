@@ -23,9 +23,17 @@ export default function ReportView() {
                 <li key={idx} className="mb-1">
                   <span className="font-semibold">Q:</span> {d.question}
                   <br />
-                  <span className="font-semibold">Your Answer:</span> {d.selected || 'Skipped'}
+                  <span className="font-semibold">Your Answer:</span>{' '}
+                  <span
+                    className={
+                      d.selected === d.correct ? 'bg-green-100 px-1' : 'bg-red-100 px-1'
+                    }
+                  >
+                    {d.selected || 'Skipped'}
+                  </span>
                   <br />
-                  <span className="font-semibold">Correct:</span> {d.correct}
+                  <span className="font-semibold">Correct:</span>{' '}
+                  <span className="bg-green-100 px-1">{d.correct}</span>
                   <br />
                   <span className="italic text-sm">{d.explanation}</span>
                 </li>

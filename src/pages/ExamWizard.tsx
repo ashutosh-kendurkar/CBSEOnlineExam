@@ -148,12 +148,21 @@ export default function ExamWizard() {
                   <td className="border px-2 py-1">
                     <ul className="list-disc ml-4">
                       {q.options.map(opt => (
-                        <li key={opt} className={opt === q.answer ? 'font-semibold' : ''}>{opt}</li>
+                        <li
+                          key={opt}
+                          className={opt === q.answer ? 'font-semibold bg-green-100' : ''}
+                        >
+                          {opt}
+                        </li>
                       ))}
                     </ul>
                   </td>
-                  <td className="border px-2 py-1">{answers[idx] || 'Skipped'}</td>
-                  <td className="border px-2 py-1">{q.answer}</td>
+                  <td
+                    className={`border px-2 py-1 ${answers[idx] === q.answer ? 'bg-green-100' : 'bg-red-100'}`}
+                  >
+                    {answers[idx] || 'Skipped'}
+                  </td>
+                  <td className="border px-2 py-1 bg-green-100">{q.answer}</td>
                   <td className="border px-2 py-1">{q.explanation}</td>
                 </tr>
               ))}
