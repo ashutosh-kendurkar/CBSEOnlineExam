@@ -1,12 +1,11 @@
 interface Question {
-  id: number;
+  id: string | number;
   question: string;
-  image: string;
+  image?: string;
   options: string[];
   answer: string;
   explanation: string;
   difficulty: string;
-  topic: string;
 }
 
 interface Props {
@@ -18,6 +17,7 @@ interface Props {
 export default function QuestionCard({ question, selected, onSelect }: Props) {
   return (
     <div className="border p-4 rounded">
+      <p className="text-sm text-gray-600 mb-1">Difficulty: {question.difficulty}</p>
       <p className="mb-2">{question.question}</p>
       {question.image && <img src={question.image} alt="" className="mb-2" />}
       <div className="space-y-2">

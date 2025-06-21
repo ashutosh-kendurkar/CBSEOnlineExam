@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import questions from '../data/magnets.json';
+import { useEffect, useState } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 import QuestionCard from '../components/QuestionCard';
 import { saveReport } from '../utils/storage';
 import { v4 as uuid } from 'uuid';
@@ -9,6 +10,8 @@ export default function ExamWizard() {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [submitted, setSubmitted] = useState(false);
+  const [examQs, setExamQs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const cancel = () => {
@@ -17,8 +20,41 @@ export default function ExamWizard() {
     }
   };
 
-  const total = 10;
-  const examQs = questions.slice(0, total);
+  useEffect(() => {
+    async function load() {
+      const snap = await getDocs(
+        collection(
+          db,
+          'classes',
+          '6',
+          'subjects',
+          'science',
+          'lessons',
+          'exploring-magnets',
+          'questions'
+        )
+      );
+      const data = snap.docs.map(d => {
+        const q = d.data() as any;
+        return {
+          id: d.id,
+          question: q.question,
+          options: q.options,
+          answer: q.correct_answer,
+          explanation: q.explanation,
+          difficulty: q.difficulty_level,
+          image: q.image_url || ''
+        };
+      });
+      const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
+      data.sort((a, b) => order.indexOf(a.difficulty) - order.indexOf(b.difficulty));
+      setExamQs(data.slice(0, 10));
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const total = examQs.length;
   const currentQ = examQs[current];
 
   const handleSelect = (option: string) => {
@@ -47,6 +83,10 @@ export default function ExamWizard() {
     setSubmitted(true);
   };
 
+  if (loading) {
+    return <div className="p-4">Loading...</div>;
+  }
+
   if (submitted) {
     const score = examQs.reduce((acc, q, idx) =>
       answers[idx] === q.answer ? acc + 1 : acc, 0);
@@ -59,6 +99,7 @@ export default function ExamWizard() {
               <tr>
                 <th className="border px-2 py-1">#</th>
                 <th className="border px-2 py-1">Question</th>
+                <th className="border px-2 py-1">Difficulty</th>
                 <th className="border px-2 py-1">Options</th>
                 <th className="border px-2 py-1">Your Answer</th>
                 <th className="border px-2 py-1">Correct</th>
@@ -70,6 +111,7 @@ export default function ExamWizard() {
                 <tr key={q.id} className="align-top">
                   <td className="border px-2 py-1 text-center">{idx + 1}</td>
                   <td className="border px-2 py-1">{q.question}</td>
+                  <td className="border px-2 py-1 text-center">{q.difficulty}</td>
                   <td className="border px-2 py-1">
                     <ul className="list-disc ml-4">
                       {q.options.map(opt => (
