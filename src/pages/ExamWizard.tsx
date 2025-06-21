@@ -15,6 +15,13 @@ export default function ExamWizard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const shuffle = (arr: any[]) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  };
+
   const cancel = () => {
     if (confirm('Cancel the exam? Your progress will be lost.')) {
       navigate('/dashboard');
@@ -75,8 +82,7 @@ export default function ExamWizard() {
           });
         }
         data = data.filter(q => failed.has(q.id) || !attempted.has(q.id));
-        const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
-        data.sort((a, b) => order.indexOf(a.difficulty_level) - order.indexOf(b.difficulty_level));
+        shuffle(data);
         setExamQs(data.slice(0, 10));
       } catch (e) {
         console.error('Failed to load questions from Firestore, using fallback.', e);
@@ -104,8 +110,7 @@ export default function ExamWizard() {
           });
         }
         data = data.filter(q => failed.has(q.id) || !attempted.has(q.id));
-        const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
-        data.sort((a, b) => order.indexOf(a.difficulty_level) - order.indexOf(b.difficulty_level));
+        shuffle(data);
         setExamQs(data.slice(0, 10));
       } finally {
         setLoading(false);
