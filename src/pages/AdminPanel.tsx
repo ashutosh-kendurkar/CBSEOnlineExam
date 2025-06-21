@@ -14,12 +14,20 @@ import { auth, db, getAdminConfig } from '../firebase';
 import Toast from '../components/Toast';
 
 interface Question {
-  id: number;
   question: string;
   options: string[];
-  answer: string;
+  correct_answer: string;
   explanation: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  class: number;
+  subject: string;
+  lesson_number: number;
+  lesson_name: string;
+  image_url: string;
+  difficulty_level: 'Easy' | 'Medium' | 'Hard';
+}
+
+interface QuestionDoc extends Question {
+  id: string;
 }
 
 export default function AdminPanel() {
@@ -30,9 +38,11 @@ export default function AdminPanel() {
   const [subjects, setSubjects] = useState<any[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
 
-  const [view, setView] = useState<'classes' | 'subjects' | 'lessons'>('classes');
+  const [view, setView] = useState<'classes' | 'subjects' | 'lessons' | 'questions'>('classes');
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('');
+  const [selectedLesson, setSelectedLesson] = useState<string>('');
+  const [questions, setQuestions] = useState<QuestionDoc[]>([]);
 
   const [newItem, setNewItem] = useState('');
   const [toast, setToast] = useState('');
@@ -62,6 +72,22 @@ export default function AdminPanel() {
   async function loadLessons(cls: string, sub: string) {
     const snap = await getDocs(collection(db, 'classes', cls, 'subjects', sub, 'lessons'));
     setLessons(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
+  }
+
+  async function loadQuestions(lessonId: string) {
+    const snap = await getDocs(
+      collection(
+        db,
+        'classes',
+        selectedClass,
+        'subjects',
+        selectedSubject,
+        'lessons',
+        lessonId,
+        'questions'
+      )
+    );
+    setQuestions(snap.docs.map(d => ({ id: d.id, ...(d.data() as Question) })));
   }
 
   const addItem = async () => {
@@ -129,15 +155,25 @@ export default function AdminPanel() {
     setView('lessons');
   };
 
+  const goToQuestions = (id: string) => {
+    setSelectedLesson(id);
+    loadQuestions(id);
+    setView('questions');
+  };
+
   const validateQuestion = (q: Question) => {
     return (
-      typeof q.id === 'number' &&
       typeof q.question === 'string' &&
       Array.isArray(q.options) &&
       q.options.length > 0 &&
-      typeof q.answer === 'string' &&
+      typeof q.correct_answer === 'string' &&
       typeof q.explanation === 'string' &&
-      ['easy', 'medium', 'hard'].includes(q.difficulty)
+      typeof q.class === 'number' &&
+      typeof q.subject === 'string' &&
+      typeof q.lesson_number === 'number' &&
+      typeof q.lesson_name === 'string' &&
+      typeof q.image_url === 'string' &&
+      ['Easy', 'Medium', 'Hard'].includes(q.difficulty_level)
     );
   };
 
@@ -172,6 +208,96 @@ export default function AdminPanel() {
     });
     await batch.commit();
     showToast('Questions uploaded');
+    loadQuestions(lessonId);
+    setSelectedLesson(lessonId);
+    setView('questions');
+  };
+
+  const addQuestion = async () => {
+    const question = prompt('Question?');
+    if (!question) return;
+    const optionsInput = prompt('Options (comma separated)?');
+    if (!optionsInput) return;
+    const options = optionsInput.split(',').map(o => o.trim()).filter(Boolean);
+    const correct_answer = prompt('Correct answer?') || '';
+    const explanation = prompt('Explanation?') || '';
+    const difficulty_level = (prompt('Difficulty (Easy/Medium/Hard)?', 'Easy') || 'Easy') as 'Easy' | 'Medium' | 'Hard';
+    const q: Question = {
+      question,
+      options,
+      correct_answer,
+      explanation,
+      class: Number(selectedClass) || 0,
+      subject: selectedSubject,
+      lesson_number: Number(selectedLesson) || 0,
+      lesson_name: selectedLesson,
+      image_url: '',
+      difficulty_level
+    };
+    if (!validateQuestion(q)) return showToast('Invalid data');
+    await setDoc(
+      doc(
+        collection(
+          db,
+          'classes',
+          selectedClass,
+          'subjects',
+          selectedSubject,
+          'lessons',
+          selectedLesson,
+          'questions'
+        )
+      ),
+      q
+    );
+    loadQuestions(selectedLesson);
+  };
+
+  const modifyQuestion = async (id: string) => {
+    const q = questions.find(q => q.id === id);
+    if (!q) return;
+    const question = prompt('Question?', q.question) || q.question;
+    const optionsInput = prompt('Options (comma separated)?', q.options.join(', '));
+    if (!optionsInput) return;
+    const options = optionsInput.split(',').map(o => o.trim()).filter(Boolean);
+    const correct_answer = prompt('Correct answer?', q.correct_answer) || q.correct_answer;
+    const explanation = prompt('Explanation?', q.explanation) || q.explanation;
+    const difficulty_level = (prompt('Difficulty (Easy/Medium/Hard)?', q.difficulty_level) || q.difficulty_level) as 'Easy' | 'Medium' | 'Hard';
+    const updated: Question = { ...q, question, options, correct_answer, explanation, difficulty_level };
+    if (!validateQuestion(updated)) return showToast('Invalid data');
+    await updateDoc(
+      doc(
+        db,
+        'classes',
+        selectedClass,
+        'subjects',
+        selectedSubject,
+        'lessons',
+        selectedLesson,
+        'questions',
+        id
+      ),
+      updated
+    );
+    loadQuestions(selectedLesson);
+  };
+
+  const deleteQuestion = async (id: string) => {
+    if (!confirm('Delete question?')) return;
+    await deleteDoc(
+      doc(
+        db,
+        'classes',
+        selectedClass,
+        'subjects',
+        selectedSubject,
+        'lessons',
+        selectedLesson,
+        'questions',
+        id
+      )
+    );
+    loadQuestions(selectedLesson);
   };
 
   if (!user) return null;
@@ -183,26 +309,38 @@ export default function AdminPanel() {
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold">Admin Panel</h1>
       {view !== 'classes' && (
-        <button className="underline" onClick={() => {
-          if (view === 'lessons') {
-            setView('subjects');
-          } else {
-            setView('classes');
-          }
-        }}>Back</button>
-      )}
-      <div className="space-x-2">
-        <input
-          className="border p-2 rounded"
-          type="text"
-          placeholder={`New ${view.slice(0, -1)}`}
-          value={newItem}
-          onChange={e => setNewItem(e.target.value)}
-        />
-        <button onClick={addItem} className="bg-blue-500 text-white px-4 py-2 rounded">
-          Add
+        <button
+          className="underline"
+          onClick={() => {
+            if (view === 'questions') {
+              setView('lessons');
+            } else if (view === 'lessons') {
+              setView('subjects');
+            } else {
+              setView('classes');
+            }
+          }}
+        >
+          Back
         </button>
-      </div>
+      )}
+      {view !== 'questions' && (
+        <div className="space-x-2">
+          <input
+            className="border p-2 rounded"
+            type="text"
+            placeholder={`New ${view.slice(0, -1)}`}
+            value={newItem}
+            onChange={e => setNewItem(e.target.value)}
+          />
+          <button
+            onClick={addItem}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Add
+          </button>
+        </div>
+      )}
       {view === 'classes' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {classes.map(c => (
@@ -242,6 +380,7 @@ export default function AdminPanel() {
                 <div className="space-x-2 text-sm">
                   <button onClick={() => modifyItem(l.id)} className="text-green-700">Modify</button>
                   <button onClick={() => deleteItem(l.id)} className="text-red-600">Delete</button>
+                  <button onClick={() => goToQuestions(l.id)} className="text-blue-600">Manage Questions</button>
                 </div>
               </div>
               <div>
@@ -250,6 +389,25 @@ export default function AdminPanel() {
                   accept="application/json"
                   onChange={e => handleUpload(l.id, e.target.files ? e.target.files[0] : null)}
                 />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {view === 'questions' && (
+        <div className="space-y-2">
+          <button
+            onClick={addQuestion}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Add Question
+          </button>
+          {questions.map(q => (
+            <div key={q.id} className="border p-2 flex justify-between items-start">
+              <span>{q.question}</span>
+              <div className="space-x-2 text-sm">
+                <button onClick={() => modifyQuestion(q.id)} className="text-green-700">Modify</button>
+                <button onClick={() => deleteQuestion(q.id)} className="text-red-600">Delete</button>
               </div>
             </div>
           ))}
