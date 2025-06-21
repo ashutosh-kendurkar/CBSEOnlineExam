@@ -30,7 +30,7 @@ export default function Dashboard() {
       </div>
       <button
         className="block w-full bg-blue-500 text-white py-2 rounded"
-        onClick={() => navigate('/exam')}
+        onClick={() => navigate('/exam-setup')}
       >
         Start New Exam
       </button>

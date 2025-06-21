@@ -24,6 +24,7 @@ interface Question {
   lesson_name: string;
   image_url: string;
   difficulty_level: 'Easy' | 'Medium' | 'Hard' | 'Over-achiever';
+  random?: number;
 }
 
 interface QuestionDoc extends Question {
@@ -222,6 +223,7 @@ export default function AdminPanel() {
     }
     const batch = writeBatch(db);
     qs.forEach(q => {
+      const data = { ...q, random: Math.random() };
       const ref = doc(
         collection(
           db,
@@ -234,7 +236,7 @@ export default function AdminPanel() {
           'questions'
         )
       );
-      batch.set(ref, q);
+      batch.set(ref, data);
     });
     await batch.commit();
     showToast('Questions uploaded');
@@ -264,7 +266,8 @@ export default function AdminPanel() {
       lesson_number: Number(selectedLesson) || 0,
       lesson_name: selectedLesson,
       image_url: '',
-      difficulty_level
+      difficulty_level,
+      random: Math.random()
     };
     const res = validateQuestion(q);
     if (!res.valid) return showToast(res.error || 'Invalid data');
