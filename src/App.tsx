@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ExamWizard from './pages/ExamWizard';
+import ExamSetup from './pages/ExamSetup';
 import ReportView from './pages/ReportView';
 import AdminPanel from './pages/AdminPanel';
 import './styles/index.css';
@@ -13,6 +14,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/exam-setup" element={<ExamSetup />} />
         <Route path="/exam" element={<ExamWizard />} />
         <Route path="/reports" element={<ReportView />} />
         <Route path="/admin" element={<AdminPanel />} />

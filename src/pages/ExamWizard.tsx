@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import fallbackQuestions from '../data/magnets.json';
 import QuestionCard from '../components/QuestionCard';
 import { saveReport, loadReports } from '../utils/storage';
 import { v4 as uuid } from 'uuid';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function ExamWizard() {
   const [current, setCurrent] = useState(0);
@@ -14,6 +14,9 @@ export default function ExamWizard() {
   const [examQs, setExamQs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const subject = searchParams.get('subject') || 'science';
+  const lessonsParam = searchParams.get('lessons');
 
   const shuffle = (arr: any[]) => {
     for (let i = arr.length - 1; i > 0; i--) {
@@ -31,30 +34,46 @@ export default function ExamWizard() {
   useEffect(() => {
     async function load() {
       try {
-        const snap = await getDocs(
-          collection(
-            db,
-            'classes',
-            '6',
-            'subjects',
-            'science',
-            'lessons',
-            'exploring-magnets',
-            'questions'
-          )
-        );
-        let data = snap.docs.map(d => {
-          const q = d.data() as any;
-          return {
-            id: d.id,
-            question: q.question,
-            options: q.options,
-            answer: q.correct_answer,
-            explanation: q.explanation,
-            difficulty_level: q.difficulty_level,
-            image: q.image_url || ''
-          };
-        });
+        let lessonIds: string[] = [];
+        if (lessonsParam) {
+          lessonIds = lessonsParam.split(',').filter(Boolean);
+        } else {
+          const lsnap = await getDocs(
+            collection(db, 'classes', '6', 'subjects', subject, 'lessons')
+          );
+          lessonIds = lsnap.docs.map(d => d.id);
+        }
+
+        let data: any[] = [];
+        for (const lesson of lessonIds) {
+          const snap = await getDocs(
+            query(
+              collection(
+                db,
+                'classes',
+                '6',
+                'subjects',
+                subject,
+                'lessons',
+                lesson,
+                'questions'
+              ),
+              orderBy('random')
+            )
+          );
+          snap.docs.forEach(d => {
+            const q = d.data() as any;
+            data.push({
+              id: d.id,
+              question: q.question,
+              options: q.options,
+              answer: q.correct_answer,
+              explanation: q.explanation,
+              difficulty_level: q.difficulty_level,
+              image: q.image_url || ''
+            });
+          });
+        }
         if (data.length === 0) {
           data = fallbackQuestions.map(q => ({
             id: q.id,
@@ -62,10 +81,12 @@ export default function ExamWizard() {
             options: q.options,
             answer: q.answer,
             explanation: q.explanation,
-            difficulty_level: q.difficulty_level.charAt(0).toUpperCase() + q.difficulty_level.slice(1),
+            difficulty_level:
+              q.difficulty_level.charAt(0).toUpperCase() + q.difficulty_level.slice(1),
             image: q.image || ''
           }));
         }
+
 
         const reports = loadReports();
         const attempted = new Set<string | number>();
@@ -117,7 +138,7 @@ export default function ExamWizard() {
       }
     }
     load();
-  }, []);
+  }, [subject, lessonsParam]);
 
   const total = examQs.length;
   const currentQ = examQs[current];
