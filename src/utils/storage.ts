@@ -1,10 +1,18 @@
 // Utilities for saving and loading exam reports using localStorage
+export interface ExamDetail {
+  id: string | number;
+  question: string;
+  selected: string | undefined;
+  correct: string;
+  explanation: string;
+}
+
 export interface ExamReport {
   id: string;
   timestamp: number;
   score: number;
   total: number;
-  details: any;
+  details: ExamDetail[];
 }
 
 const STORAGE_KEY = 'exam_reports';
