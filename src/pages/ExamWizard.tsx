@@ -87,6 +87,10 @@ export default function ExamWizard() {
     return <div className="p-4">Loading...</div>;
   }
 
+  if (examQs.length === 0) {
+    return <div className="p-4">Questions are not available.</div>;
+  }
+
   if (submitted) {
     const score = examQs.reduce((acc, q, idx) =>
       answers[idx] === q.answer ? acc + 1 : acc, 0);
