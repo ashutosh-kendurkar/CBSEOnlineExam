@@ -42,12 +42,12 @@ export default function ExamWizard() {
           options: q.options,
           answer: q.correct_answer,
           explanation: q.explanation,
-          difficulty: q.difficulty_level,
+          difficulty_level: q.difficulty_level,
           image: q.image_url || ''
         };
       });
       const order = ['Easy', 'Medium', 'Hard', 'Over-achiever'];
-      data.sort((a, b) => order.indexOf(a.difficulty) - order.indexOf(b.difficulty));
+      data.sort((a, b) => order.indexOf(a.difficulty_level) - order.indexOf(b.difficulty_level));
       setExamQs(data.slice(0, 10));
       setLoading(false);
     }
@@ -111,7 +111,7 @@ export default function ExamWizard() {
                 <tr key={q.id} className="align-top">
                   <td className="border px-2 py-1 text-center">{idx + 1}</td>
                   <td className="border px-2 py-1">{q.question}</td>
-                  <td className="border px-2 py-1 text-center">{q.difficulty}</td>
+                  <td className="border px-2 py-1 text-center">{q.difficulty_level}</td>
                   <td className="border px-2 py-1">
                     <ul className="list-disc ml-4">
                       {q.options.map(opt => (
