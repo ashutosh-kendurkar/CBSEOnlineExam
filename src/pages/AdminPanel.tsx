@@ -340,6 +340,28 @@ export default function AdminPanel() {
     loadQuestions(selectedLesson);
   };
 
+  const deleteAllQuestions = async () => {
+    if (!confirm('Delete all questions?')) return;
+    const batch = writeBatch(db);
+    questions.forEach(q => {
+      batch.delete(
+        doc(
+          db,
+          'classes',
+          selectedClass,
+          'subjects',
+          selectedSubject,
+          'lessons',
+          selectedLesson,
+          'questions',
+          q.id
+        )
+      );
+    });
+    await batch.commit();
+    loadQuestions(selectedLesson);
+  };
+
   if (!user) return null;
   if (adminEmail && user.email !== adminEmail) {
     return <div className="p-4">Unauthorized</div>;
@@ -463,6 +485,12 @@ export default function AdminPanel() {
             className="bg-blue-500 text-white px-4 py-2 rounded"
           >
             Add Question
+          </button>
+          <button
+            onClick={deleteAllQuestions}
+            className="bg-red-500 text-white px-4 py-2 rounded ml-2"
+          >
+            Delete All
           </button>
           {paginated.map(q => (
             <div key={q.id} className="border p-2 flex justify-between items-start">
